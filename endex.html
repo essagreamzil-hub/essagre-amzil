@@ -565,11 +565,11 @@ function readStore(key, fallback) {
     return v !== null && v !== undefined ? v : fallback;
   } catch (e) { return fallback; }
 }
-const SETTINGS = readStore("chopa_settings", { wa: "212619052111", freeOver: 500, defaultFee: 25, cities: DEFAULT_CITIES });
-const WA_NUMBER = SETTINGS.wa;
-const FREE_DELIVERY_OVER = SETTINGS.freeOver;
-const DEFAULT_DELIVERY = SETTINGS.defaultFee;
-const CITIES = SETTINGS.cities;
+let SETTINGS = readStore("chopa_settings", { wa: "212619052111", freeOver: 500, defaultFee: 25, cities: DEFAULT_CITIES });
+let WA_NUMBER = SETTINGS.wa;
+let FREE_DELIVERY_OVER = SETTINGS.freeOver;
+let DEFAULT_DELIVERY = SETTINGS.defaultFee;
+let CITIES = SETTINGS.cities;
 let PRODUCTS = DEFAULT_PRODUCTS.slice();
 let CATEGORIES = readStore("chopa_categories", DEFAULT_CATEGORIES);
 let lastResultsTitle = "كل المنتجات";
@@ -1059,7 +1059,7 @@ document.getElementById("year").textContent = new Date().getFullYear();
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot, addDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDqtm1gdNH3Ik5JQIMzWlwATebfkd44m4g",
@@ -1115,6 +1115,17 @@ window.saveOrder = async function (data) {
     console.error("saveOrder:", e);
   }
 };
+
+onSnapshot(doc(db, "settings", "store"), (s) => {
+  if (s.exists()) {
+    const d = s.data();
+    if (d.wa) WA_NUMBER = d.wa;
+    if (d.freeOver != null) FREE_DELIVERY_OVER = Number(d.freeOver);
+    if (d.defaultFee != null) DEFAULT_DELIVERY = Number(d.defaultFee);
+    if (Array.isArray(d.cities) && d.cities.length) CITIES = d.cities;
+    refreshAll();
+  }
+}, () => {});
 </script>
 </body>
 </html>
