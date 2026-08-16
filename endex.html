@@ -277,6 +277,8 @@ section{padding-top:34px}
   .hero-img{width:80%}
 }
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -455,6 +457,7 @@ section{padding-top:34px}
         </div>
         <div>
           <label>المدينة</label>
+          <input id="fCitySearch" type="text" placeholder="ابحث عن مدينتك هنا..." oninput="filterCities()" autocomplete="off">
           <select id="fCity" onchange="renderOrderSum()"></select>
         </div>
         <div>
@@ -478,13 +481,436 @@ section{padding-top:34px}
 
 <script>
 const DEFAULT_CITIES = [
-  { city: "أكادير", fee: 20 },
-  { city: "الدار البيضاء", fee: 30 },
-  { city: "الرباط", fee: 30 },
-  { city: "مراكش", fee: 30 },
-  { city: "فاس", fee: 35 },
-  { city: "طنجة", fee: 35 },
-  { city: "مدن أخرى", fee: 45 }
+  { city: "Aarbaïa", fee: 45 },
+  { city: "Adouz Beni Melal", fee: 45 },
+  { city: "Aérir", fee: 35 },
+  { city: "Afiourer", fee: 45 },
+  { city: "Agadir", fee: 19 },
+  { city: "Agafay Marrakech", fee: 40 },
+  { city: "Agdz", fee: 45 },
+  { city: "Agéidir Rg Kech", fee: 45 },
+  { city: "Agéim", fee: 45 },
+  { city: "Aghbala", fee: 45 },
+  { city: "Aghbalou Nserdan", fee: 45 },
+  { city: "Aglmous", fee: 45 },
+  { city: "Aglou", fee: 40 },
+  { city: "Agouray", fee: 45 },
+  { city: "Ahad Amsila", fee: 45 },
+  { city: "Ahfir", fee: 45 },
+  { city: "Ain Aicha", fee: 45 },
+  { city: "Ain Aouda", fee: 45 },
+  { city: "Ain Attig", fee: 40 },
+  { city: "Ain Chegag", fee: 45 },
+  { city: "Ain Chekafi", fee: 45 },
+  { city: "Ain Drij", fee: 45 },
+  { city: "Ain Harrouda", fee: 40 },
+  { city: "Ain Mediouna", fee: 45 },
+  { city: "Ain Sfa", fee: 45 },
+  { city: "Ain Taoujdate", fee: 45 },
+  { city: "Ait Amira", fee: 33 },
+  { city: "Ait Baha", fee: 40 },
+  { city: "Ait Iaaza", fee: 40 },
+  { city: "Ait Ishak", fee: 45 },
+  { city: "Ait Kamra", fee: 45 },
+  { city: "Ait Meloul", fee: 23 },
+  { city: "Ait Ourir", fee: 40 },
+  { city: "Ajdir Rwgion Hociema", fee: 45 },
+  { city: "Akhfiennir", fee: 45 },
+  { city: "Akka", fee: 45 },
+  { city: "Aklim", fee: 45 },
+  { city: "Aknoul", fee: 45 },
+  { city: "Al Aaroui", fee: 45 },
+  { city: "Al Hoceima", fee: 43 },
+  { city: "Al Khalfiya", fee: 45 },
+  { city: "Alnifi", fee: 45 },
+  { city: "Amrras", fee: 45 },
+  { city: "Amzmiz Marrakech", fee: 40 },
+  { city: "Anza", fee: 33 },
+  { city: "Aoufous", fee: 45 },
+  { city: "Aoulouz", fee: 43 },
+  { city: "Aourir", fee: 35 },
+  { city: "Apt Attab", fee: 45 },
+  { city: "Arekmane", fee: 45 },
+  { city: "Arfioud", fee: 45 },
+  { city: "Asni", fee: 45 },
+  { city: "Assa", fee: 45 },
+  { city: "Assaki Taliouine", fee: 45 },
+  { city: "Assilah", fee: 43 },
+  { city: "Azemmour", fee: 40 },
+  { city: "Azilal", fee: 45 },
+  { city: "Azrou", fee: 45 },
+  { city: "Azrou Agadir", fee: 33 },
+  { city: "Bab Berred", fee: 45 },
+  { city: "Bab Marzoka", fee: 45 },
+  { city: "Bab Taza", fee: 45 },
+  { city: "Bargame", fee: 45 },
+  { city: "Bejaad", fee: 43 },
+  { city: "Belaakid Marrakech", fee: 45 },
+  { city: "Belfiaa", fee: 33 },
+  { city: "Ben Ahmed Chefchaouen", fee: 45 },
+  { city: "Ben Ahmed Settat", fee: 40 },
+  { city: "Ben Guerir", fee: 40 },
+  { city: "Ben Mathar", fee: 45 },
+  { city: "Ben Methar", fee: 45 },
+  { city: "Ben Taieb", fee: 45 },
+  { city: "Beni Ansar", fee: 45 },
+  { city: "Beni Ayat", fee: 45 },
+  { city: "Beni Drar", fee: 45 },
+  { city: "Beni Hadifia", fee: 45 },
+  { city: "Beni Helal", fee: 45 },
+  { city: "Beni Mellal", fee: 40 },
+  { city: "Beni Tadjit", fee: 45 },
+  { city: "Benslimane", fee: 40 },
+  { city: "Beradia", fee: 45 },
+  { city: "Berkane", fee: 43 },
+  { city: "Berrchid", fee: 40 },
+  { city: "Biogra", fee: 33 },
+  { city: "Bir Jdid", fee: 45 },
+  { city: "Blaya", fee: 45 },
+  { city: "Bni Bofirah", fee: 45 },
+  { city: "Bni Bouayach", fee: 45 },
+  { city: "Bni Chiker", fee: 45 },
+  { city: "Bni Mathar", fee: 45 },
+  { city: "Bouanane", fee: 45 },
+  { city: "Bouarfia", fee: 45 },
+  { city: "Bouarg", fee: 45 },
+  { city: "Bouderbala", fee: 45 },
+  { city: "Boudinar", fee: 45 },
+  { city: "Boudnib", fee: 45 },
+  { city: "Boufiakrane", fee: 45 },
+  { city: "Bouizakarne", fee: 43 },
+  { city: "Boujdour", fee: 43 },
+  { city: "Boujniba", fee: 45 },
+  { city: "Boukidaren", fee: 45 },
+  { city: "Boulanouare", fee: 45 },
+  { city: "Boulman", fee: 45 },
+  { city: "Boumalne Dades", fee: 45 },
+  { city: "Boumia", fee: 45 },
+  { city: "Bouskoura", fee: 40 },
+  { city: "Bouyafar", fee: 45 },
+  { city: "Bouznika", fee: 40 },
+  { city: "Bzou", fee: 45 },
+  { city: "Cabo Negro", fee: 45 },
+  { city: "Cafemort", fee: 45 },
+  { city: "Casablanca", fee: 33 },
+  { city: "Chefichaouen", fee: 43 },
+  { city: "Chéiter Marrakech", fee: 40 },
+  { city: "Chelalat Mohamadia", fee: 45 },
+  { city: "Chemaia", fee: 40 },
+  { city: "Chichaoua", fee: 40 },
+  { city: "Dakhla", fee: 43 },
+  { city: "Dar Bouaza", fee: 40 },
+  { city: "Dar El Kadari", fee: 45 },
+  { city: "Dar El Kebdani", fee: 45 },
+  { city: "Dcheira", fee: 19 },
+  { city: "Déiran", fee: 45 },
+  { city: "Delalha", fee: 45 },
+  { city: "Demnate", fee: 40 },
+  { city: "Derdara", fee: 45 },
+  { city: "Deroua", fee: 40 },
+  { city: "Drarga", fee: 25 },
+  { city: "Driouch", fee: 45 },
+  { city: "El Afaq", fee: 40 },
+  { city: "El Gara", fee: 40 },
+  { city: "El Haj Kaddour", fee: 45 },
+  { city: "El Hajeb", fee: 45 },
+  { city: "El Jabeha", fee: 45 },
+  { city: "El Jadida", fee: 35 },
+  { city: "El Kelaa Des Sraghna", fee: 40 },
+  { city: "El Ksiba", fee: 45 },
+  { city: "El Marsa", fee: 45 },
+  { city: "El Ouatya", fee: 43 },
+  { city: "Elgfifiat", fee: 45 },
+  { city: "Errachidia", fee: 43 },
+  { city: "Errahma", fee: 35 },
+  { city: "Errich", fee: 45 },
+  { city: "Essaouira", fee: 35 },
+  { city: "Essmara", fee: 43 },
+  { city: "Farkhana", fee: 45 },
+  { city: "Fes", fee: 40 },
+  { city: "Fiam Audi  Beni Melal", fee: 45 },
+  { city: "Fiam Laansar Beni Mellal", fee: 45 },
+  { city: "Fiaryata Beni Melal", fee: 45 },
+  { city: "Figuig", fee: 45 },
+  { city: "Fioko", fee: 45 },
+  { city: "Fnide'", fee: 45 },
+  { city: "Fom Jemaa", fee: 45 },
+  { city: "Fom Lahcen", fee: 45 },
+  { city: "Fom Zkid", fee: 45 },
+  { city: "F'uih Ben Salah", fee: 45 },
+  { city: "Geznaya", fee: 45 },
+  { city: "Ghazoua", fee: 40 },
+  { city: "Ghefisay", fee: 45 },
+  { city: "Ghmate", fee: 45 },
+  { city: "Guelmim", fee: 43 },
+  { city: "Guercifi", fee: 45 },
+  { city: "Guisser", fee: 45 },
+  { city: "Gulmima  Errachidia", fee: 45 },
+  { city: "Had Bouhssoussen", fee: 45 },
+  { city: "Had Hrara", fee: 45 },
+  { city: "Had Kourt", fee: 45 },
+  { city: "Had Soualem", fee: 45 },
+  { city: "Haouzia", fee: 45 },
+  { city: "Harhoura", fee: 40 },
+  { city: "Ifiran", fee: 45 },
+  { city: "Ighram Laalam", fee: 45 },
+  { city: "Ighram-taroudannt", fee: 45 },
+  { city: "Ighrem Nâougdal", fee: 45 },
+  { city: "Ihnchan", fee: 45 },
+  { city: "Ikhorban", fee: 45 },
+  { city: "Imghran", fee: 45 },
+  { city: "Imi Éadar", fee: 35 },
+  { city: "Imintanoute", fee: 40 },
+  { city: "Imouzar Marmocha", fee: 45 },
+  { city: "Imouzzer Kandar", fee: 45 },
+  { city: "Imzouren", fee: 45 },
+  { city: "Inchaden", fee: 45 },
+  { city: "Inzegane", fee: 19 },
+  { city: "Issaguen", fee: 45 },
+  { city: "Izemmouren", fee: 45 },
+  { city: "Jaadar", fee: 45 },
+  { city: "Jamaat Shayam", fee: 45 },
+  { city: "Jerada", fee: 45 },
+  { city: "Jorfi El Melha", fee: 45 },
+  { city: "Jorfi Sefiar", fee: 45 },
+  { city: "Kahfi Nsour", fee: 45 },
+  { city: "Kalaat Bou'orra", fee: 45 },
+  { city: "Kalaat Mgouna", fee: 45 },
+  { city: "Karia Be Mohammed", fee: 45 },
+  { city: "Kasbah Tadla", fee: 45 },
+  { city: "Kassita", fee: 45 },
+  { city: "Kenitra", fee: 35 },
+  { city: "Khemisset", fee: 40 },
+  { city: "Khenifira", fee: 45 },
+  { city: "Khmis Sahel", fee: 45 },
+  { city: "Khmiss Zemamera", fee: 45 },
+  { city: "Khnichat", fee: 45 },
+  { city: "Khouribga", fee: 45 },
+  { city: "Krimda", fee: 45 },
+  { city: "Krona", fee: 45 },
+  { city: "Ksar El Kebir", fee: 45 },
+  { city: "Ksar Sghir", fee: 45 },
+  { city: "L Mhamid Marrakech", fee: 40 },
+  { city: "Laaénat", fee: 45 },
+  { city: "Laaïamra", fee: 45 },
+  { city: "Laarjat", fee: 45 },
+  { city: "Laattaouia", fee: 40 },
+  { city: "Laayoun Cher'ia", fee: 45 },
+  { city: "Laayoune", fee: 43 },
+  { city: "Lakbab", fee: 45 },
+  { city: "Lala Mimouna", fee: 45 },
+  { city: "Lalla Takerkost", fee: 45 },
+  { city: "Larache", fee: 40 },
+  { city: "Lbrouj", fee: 40 },
+  { city: "Lkhsas", fee: 45 },
+  { city: "L'liaa", fee: 33 },
+  { city: "Lmahya", fee: 45 },
+  { city: "Loudaya", fee: 35 },
+  { city: "M Di'", fee: 45 },
+  { city: "Madagh", fee: 45 },
+  { city: "Maflziz", fee: 45 },
+  { city: "Mansouria", fee: 45 },
+  { city: "Mariouari", fee: 45 },
+  { city: "Marrakech", fee: 33 },
+  { city: "Martil", fee: 45 },
+  { city: "Marzouga", fee: 45 },
+  { city: "Massa", fee: 40 },
+  { city: "Mechra Bel Ksiri", fee: 40 },
+  { city: "Mediouna", fee: 40 },
+  { city: "Mehdya", fee: 40 },
+  { city: "Meknes", fee: 40 },
+  { city: "Mer Lefit", fee: 45 },
+  { city: "Mhaya", fee: 45 },
+  { city: "Midar", fee: 45 },
+  { city: "Midelt", fee: 45 },
+  { city: "Missour", fee: 45 },
+  { city: "Mjat", fee: 45 },
+  { city: "Mohammedia", fee: 40 },
+  { city: "Moulay Aakoub", fee: 45 },
+  { city: "Moulay Abdellah", fee: 45 },
+  { city: "Moulay Bouazza", fee: 45 },
+  { city: "Moulay Bouslham", fee: 40 },
+  { city: "Moulay Driss Zarhoun", fee: 45 },
+  { city: "Mrirt", fee: 45 },
+  { city: "Mzoda", fee: 40 },
+  { city: "Mzodya", fee: 45 },
+  { city: "Nador", fee: 45 },
+  { city: "Nkob", fee: 45 },
+  { city: "Nouaceur", fee: 40 },
+  { city: "Nzalat Laadam", fee: 45 },
+  { city: "Ouad Laabid", fee: 45 },
+  { city: "Ouad Laou", fee: 45 },
+  { city: "Oualidia", fee: 40 },
+  { city: "Ouaouizeght", fee: 45 },
+  { city: "Ouaoumana", fee: 45 },
+  { city: "Ouargui", fee: 45 },
+  { city: "Ouarzazat", fee: 40 },
+  { city: "Ouazzane", fee: 45 },
+  { city: "Oued Amlil", fee: 45 },
+  { city: "Oued Zem", fee: 45 },
+  { city: "Oujda", fee: 43 },
+  { city: "Oulad Aabo", fee: 45 },
+  { city: "Oulad Ayad", fee: 45 },
+  { city: "Oulad Beni Moussa", fee: 45 },
+  { city: "Oulad Berhil", fee: 45 },
+  { city: "Oulad Ettayeb", fee: 45 },
+  { city: "Oulad Fraj", fee: 45 },
+  { city: "Oulad Ghanem", fee: 45 },
+  { city: "Oulad Jerrar", fee: 45 },
+  { city: "Oulad Mbarek Bni Mellal", fee: 45 },
+  { city: "Oulad Moussa", fee: 45 },
+  { city: "Oulad Mtaa", fee: 45 },
+  { city: "Oulad Said Beni Melal", fee: 45 },
+  { city: "Oulad Said Settat", fee: 45 },
+  { city: "Oulad Salah", fee: 45 },
+  { city: "Oulad Settout", fee: 45 },
+  { city: "Oulad Sidi Chenane", fee: 45 },
+  { city: "Oulad Teima", fee: 35 },
+  { city: "Oulad Yahia Lagraire", fee: 45 },
+  { city: "Oulad Youssef", fee: 45 },
+  { city: "Oulad Zidouh", fee: 45 },
+  { city: "Ouled Ali Region Beni Mellal", fee: 45 },
+  { city: "Ouled Yaiche", fee: 45 },
+  { city: "Oulmes", fee: 45 },
+  { city: "Ounagha", fee: 40 },
+  { city: "Ourika", fee: 40 },
+  { city: "Outat El Haj", fee: 45 },
+  { city: "Ouzoud", fee: 45 },
+  { city: "Rabat", fee: 33 },
+  { city: "Ras El Ain Settat", fee: 45 },
+  { city: "Ras El Ma Fies", fee: 45 },
+  { city: "Ras Lma Oujda", fee: 45 },
+  { city: "Rehamna", fee: 40 },
+  { city: "Rissani", fee: 45 },
+  { city: "Romani", fee: 45 },
+  { city: "Sabaa Aayoun", fee: 45 },
+  { city: "Safi", fee: 35 },
+  { city: "Sahrij", fee: 45 },
+  { city: "Saidia", fee: 45 },
+  { city: "Sale", fee: 33 },
+  { city: "Sale El Jadida", fee: 35 },
+  { city: "Sebt El Guerdane", fee: 35 },
+  { city: "Sebt Gzoula", fee: 45 },
+  { city: "Sebt Jahjouh", fee: 45 },
+  { city: "Sebt Oulad Nemma", fee: 45 },
+  { city: "Sefirou", fee: 45 },
+  { city: "Selouane", fee: 45 },
+  { city: "Settat", fee: 40 },
+  { city: "Sid Lmokhtar", fee: 45 },
+  { city: "Sidi Aadi", fee: 45 },
+  { city: "Sidi Abdelah Lghyat", fee: 45 },
+  { city: "Sidi Abed", fee: 45 },
+  { city: "Sidi Allal El Bahraoui", fee: 45 },
+  { city: "Sidi Allal Tazi", fee: 45 },
+  { city: "Sidi Bennour", fee: 45 },
+  { city: "Sidi Bernoussi", fee: 40 },
+  { city: "Sidi Bibi", fee: 35 },
+  { city: "Sidi Bou Othmane", fee: 40 },
+  { city: "Sidi Bouknadel", fee: 40 },
+  { city: "Sidi Bousberr", fee: 45 },
+  { city: "Sidi Bouzid", fee: 40 },
+  { city: "Sidi Bouzkri", fee: 45 },
+  { city: "Sidi Hajaj Setatt", fee: 45 },
+  { city: "Sidi Hajaj Tit Melil", fee: 45 },
+  { city: "Sidi Harazem", fee: 45 },
+  { city: "Sidi Ifini", fee: 45 },
+  { city: "Sidi Jaber", fee: 45 },
+  { city: "Sidi Kacem", fee: 45 },
+  { city: "Sidi Kaouki", fee: 45 },
+  { city: "Sidi Lmkhtar", fee: 45 },
+  { city: "Sidi Messaoud", fee: 40 },
+  { city: "Sidi Rahal Jadida", fee: 40 },
+  { city: "Sidi Sliman", fee: 45 },
+  { city: "Sidi Smail", fee: 45 },
+  { city: "Sidi Taibi", fee: 40 },
+  { city: "Sidi Yahya El Gharb", fee: 45 },
+  { city: "Sidi Yahya Zaair", fee: 40 },
+  { city: "Sidi Zéin", fee: 40 },
+  { city: "Skhirat", fee: 40 },
+  { city: "Skhor Rahmana", fee: 45 },
+  { city: "Skoura", fee: 45 },
+  { city: "Smimou", fee: 40 },
+  { city: "Souiria", fee: 45 },
+  { city: "Souk Elarbaa Du Gharb", fee: 45 },
+  { city: "Tabounte", fee: 45 },
+  { city: "Taddart Anza", fee: 33 },
+  { city: "Taddart Guercifi", fee: 45 },
+  { city: "Taddart-l'liaa", fee: 40 },
+  { city: "Tafiersit", fee: 45 },
+  { city: "Tafiraut", fee: 45 },
+  { city: "Tafoughalt", fee: 45 },
+  { city: "Tagadirt", fee: 25 },
+  { city: "Taghazoute", fee: 35 },
+  { city: "Taghzirt", fee: 45 },
+  { city: "Tagonit Zagora", fee: 45 },
+  { city: "Tagzirt Beni Mellal", fee: 45 },
+  { city: "Tahannaout", fee: 40 },
+  { city: "Tahla", fee: 45 },
+  { city: "Tajda", fee: 45 },
+  { city: "Tala Youssefi", fee: 45 },
+  { city: "Taliouine", fee: 45 },
+  { city: "Talsint", fee: 45 },
+  { city: "Tamaait", fee: 33 },
+  { city: "Tamansourt", fee: 35 },
+  { city: "Tamaraght", fee: 45 },
+  { city: "Tamaris", fee: 40 },
+  { city: "Tamdrara", fee: 45 },
+  { city: "Tamesna", fee: 45 },
+  { city: "Tamgrout", fee: 45 },
+  { city: "Tamlalt", fee: 43 },
+  { city: "Tamri", fee: 45 },
+  { city: "Tamsamane", fee: 45 },
+  { city: "Tamsloht Marrakech", fee: 40 },
+  { city: "Tan Tan", fee: 43 },
+  { city: "Tanant", fee: 45 },
+  { city: "Tanger", fee: 40 },
+  { city: "Taounate", fee: 45 },
+  { city: "Taourirt", fee: 45 },
+  { city: "Targuist", fee: 45 },
+  { city: "Taroudannt", fee: 35 },
+  { city: "Tasltant Marrakech", fee: 40 },
+  { city: "Tata", fee: 45 },
+  { city: "Taza", fee: 45 },
+  { city: "Tazenakht", fee: 45 },
+  { city: "Tazzarine", fee: 45 },
+  { city: "Temanar", fee: 45 },
+  { city: "Temara", fee: 35 },
+  { city: "Tendrara", fee: 45 },
+  { city: "Terfiaya", fee: 45 },
+  { city: "Tetouan", fee: 45 },
+  { city: "Tiet", fee: 40 },
+  { city: "Tifioultoute", fee: 45 },
+  { city: "Tighjijt", fee: 45 },
+  { city: "Tighsalin", fee: 45 },
+  { city: "Tikiouine", fee: 20 },
+  { city: "Timdline", fee: 45 },
+  { city: "Timhdit", fee: 45 },
+  { city: "Timoulay", fee: 45 },
+  { city: "Timsia", fee: 33 },
+  { city: "Tin Chtouka", fee: 45 },
+  { city: "Tin Mansseur", fee: 40 },
+  { city: "Tinghir", fee: 45 },
+  { city: "Tinjdad", fee: 45 },
+  { city: "Tinzoline", fee: 45 },
+  { city: "Tit Melil", fee: 40 },
+  { city: "Tizi Ouasli", fee: 45 },
+  { city: "Tizi Oussli", fee: 45 },
+  { city: "Tiznit", fee: 35 },
+  { city: "Tiztoutine", fee: 45 },
+  { city: "Tleta Sidi Bouguedra", fee: 45 },
+  { city: "Tnine Chtouka", fee: 45 },
+  { city: "Tnine Lgharbia", fee: 45 },
+  { city: "Youssoufia", fee: 40 },
+  { city: "Zaéit Chikh", fee: 45 },
+  { city: "Zaéit Sidi Ismail", fee: 45 },
+  { city: "Zag", fee: 45 },
+  { city: "Zagora", fee: 45 },
+  { city: "Zaio", fee: 45 },
+  { city: "Zaouiet Bouzarktoune", fee: 40 },
+  { city: "Zayda", fee: 45 },
+  { city: "Zeghanghane", fee: 45 },
+  { city: "Zoumi", fee: 45 },
+  { city: "Zrizer", fee: 45 },
 ];
 const POPULAR = ["iPhone", "Galaxy", "AirPods", "ساعة ذكية", "سماعات", "PlayStation", "لابتوب", "Power Bank"];
 
@@ -566,6 +992,7 @@ function readStore(key, fallback) {
   } catch (e) { return fallback; }
 }
 let SETTINGS = readStore("chopa_settings", { wa: "212619052111", freeOver: 500, defaultFee: 25, cities: DEFAULT_CITIES });
+if (!Array.isArray(SETTINGS.cities) || SETTINGS.cities.length < 100) SETTINGS.cities = DEFAULT_CITIES.slice();
 let WA_NUMBER = SETTINGS.wa;
 let FREE_DELIVERY_OVER = SETTINGS.freeOver;
 let DEFAULT_DELIVERY = SETTINGS.defaultFee;
@@ -866,9 +1293,9 @@ function waProduct(id, ev) {
 
 function openCheckout() {
   if (!state.cart.length) return;
-  const sel = document.getElementById("fCity");
-  sel.innerHTML = '<option value="">اختر المدينة</option>' + CITIES.map((c) => '<option value="' + c.city + '">' + c.city + " — " + c.fee + " DH" + '</option>').join("");
-  sel.value = "";
+  document.getElementById("fCitySearch").value = "";
+  renderCityOptions(CITIES);
+  document.getElementById("fCity").value = "";
   document.getElementById("fName").value = "";
   document.getElementById("fPhone").value = "";
   document.getElementById("fAddress").value = "";
@@ -879,6 +1306,19 @@ function openCheckout() {
 }
 function closeCheckout() {
   document.getElementById("checkoutModal").classList.remove("open");
+}
+function renderCityOptions(list) {
+  const sel = document.getElementById("fCity");
+  sel.innerHTML = '<option value="">اختر المدينة</option>' + list.map((c) => '<option value="' + c.city + '">' + c.city + " — " + c.fee + " DH" + '</option>').join("");
+}
+function filterCities() {
+  const q = document.getElementById("fCitySearch").value.trim().toLowerCase();
+  const sel = document.getElementById("fCity");
+  const prev = sel.value;
+  const list = q ? CITIES.filter((c) => c.city.toLowerCase().includes(q)) : CITIES;
+  renderCityOptions(list);
+  sel.value = list.some((c) => c.city === prev) ? prev : "";
+  renderOrderSum();
 }
 function shippingFor(city) {
   const subtotal = cartTotal();
@@ -1057,10 +1497,7 @@ renderSections();
 updateBadge();
 document.getElementById("year").textContent = new Date().getFullYear();
 </script>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot, addDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+<script>
 const firebaseConfig = {
   apiKey: "AIzaSyDqtm1gdNH3Ik5JQIMzWlwATebfkd44m4g",
   authDomain: "chopa-beauty.firebaseapp.com",
@@ -1069,8 +1506,8 @@ const firebaseConfig = {
   messagingSenderId: "485863464627",
   appId: "1:485863464627:web:3e8db5b79462289ae95ac6"
 };
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
 function refreshAll() {
   renderSections();
@@ -1080,7 +1517,7 @@ function refreshAll() {
   }
 }
 
-onSnapshot(collection(db, "products"), (snap) => {
+db.collection("products").onSnapshot((snap) => {
   const list = snap.docs.map((d) => ({
     id: d.id,
     slug: d.data().slug || ("p-" + d.id),
@@ -1107,22 +1544,22 @@ onSnapshot(collection(db, "products"), (snap) => {
   }
 }, () => {});
 
-const ordersCol = collection(db, "orders");
+const ordersCol = db.collection("orders");
 window.saveOrder = async function (data) {
   try {
-    await addDoc(ordersCol, { ...data, date: new Date().toISOString() });
+    await ordersCol.add({ ...data, date: new Date().toISOString() });
   } catch (e) {
     console.error("saveOrder:", e);
   }
 };
 
-onSnapshot(doc(db, "settings", "store"), (s) => {
+db.doc("settings/store").onSnapshot((s) => {
   if (s.exists()) {
     const d = s.data();
     if (d.wa) WA_NUMBER = d.wa;
     if (d.freeOver != null) FREE_DELIVERY_OVER = Number(d.freeOver);
     if (d.defaultFee != null) DEFAULT_DELIVERY = Number(d.defaultFee);
-    if (Array.isArray(d.cities) && d.cities.length) CITIES = d.cities;
+    if (Array.isArray(d.cities) && d.cities.length >= 100) CITIES = d.cities;
     refreshAll();
   }
 }, () => {});
